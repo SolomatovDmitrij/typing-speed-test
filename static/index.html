@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажёр скорописи 🦀</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+
+        .fragment-info {
+            text-align: center;
+            color: #00d9ff;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00d9ff;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        .text-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+            user-select: none;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .char-correct {
+            color: #00ff88;
+        }
+
+        .char-wrong {
+            color: #ff4757;
+            text-decoration: underline;
+        }
+
+        .char-pending {
+            color: #888;
+        }
+
+        #input-area {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #input-area:focus {
+            border-color: #00d9ff;
+        }
+
+        #input-area:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            min-width: 150px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #start-btn {
+            background: linear-gradient(135deg, #00d9ff, #0099cc);
+            color: #fff;
+        }
+
+        #restart-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+            color: #fff;
+        }
+
+        #load-text-btn {
+            background: linear-gradient(135deg, #a8e063, #56ab2f);
+            color: #fff;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+        }
+
+        #text-input {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            font-size: 1em;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            margin-bottom: 20px;
+            resize: vertical;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+        }
+
+        #save-text-btn {
+            background: linear-gradient(135deg, #00d9ff, #0099cc);
+            color: #fff;
+        }
+
+        #cancel-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .result-message {
+            text-align: center;
+            font-size: 1.5em;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 255, 136, 0.2);
+            border-radius: 10px;
+            display: none;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.2em;
+            color: #00d9ff;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⌨️ Тренажёр скорописи</h1>
+        <p class="subtitle">Проверь скорость печати в символах в минуту</p>
+        <div class="fragment-info" id="fragment-info">Фрагмент 1 из —</div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-value" id="wpm">0</div>
+                <div class="stat-label">Симв/мин</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="accuracy">100%</div>
+                <div class="stat-label">Точность</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="time">0с</div>
+                <div class="stat-label">Время</div>
+            </div>
+        </div>
+
+        <div class="timer" id="timer-display"></div>
+
+        <div class="text-display" id="text-display">
+            <span class="char-pending">Нажмите "Начать тест" для старта...</span>
+        </div>
+
+        <input type="text" id="input-area" placeholder="Начните печатать здесь..." disabled>
+
+        <div class="buttons">
+            <button id="start-btn">▶️ Начать тест</button>
+            <button id="restart-btn">🔄 Заново</button>
+            <button id="reset-btn">🔁 Сбросить</button>
+            <button id="load-text-btn">📝 Загрузить текст</button>
+        </div>
+
+        <div class="result-message" id="result-message"></div>
+    </div>
+
+    <!-- Modal for adding custom text -->
+    <div class="modal" id="text-modal">
+        <div class="modal-content">
+            <h2>📝 Добавить свой текст</h2>
+            <textarea id="text-input" placeholder="Введите ваш текст здесь..."></textarea>
+            <div class="modal-buttons">
+                <button id="save-text-btn">💾 Сохранить</button>
+                <button id="cancel-btn">❌ Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentText = '';
+        let startTime = null;
+        let timerInterval = null;
+        let isRunning = false;
+        let testCompleted = false;
+
+        const textDisplay = document.getElementById('text-display');
+        const inputArea = document.getElementById('input-area');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const loadTextBtn = document.getElementById('load-text-btn');
+        const wpmDisplay = document.getElementById('wpm');
+        const accuracyDisplay = document.getElementById('accuracy');
+        const timeDisplay = document.getElementById('time');
+        const timerDisplay = document.getElementById('timer-display');
+        const resultMessage = document.getElementById('result-message');
+        const textModal = document.getElementById('text-modal');
+        const textInput = document.getElementById('text-input');
+        const saveTextBtn = document.getElementById('save-text-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const fragmentInfo = document.getElementById('fragment-info');
+        const resetBtn = document.getElementById('reset-btn');
+
+        // Fetch text from server
+        async function fetchText() {
+            try {
+                const response = await fetch('/api/text');
+                const data = await response.json();
+                fragmentInfo.textContent = `Фрагмент ${data.current} из ${data.total}`;
+                return data.text;
+            } catch (error) {
+                console.error('Error fetching text:', error);
+                fragmentInfo.textContent = '';
+                return 'Нажмите "Начать тест" для старта...';
+            }
+        }
+
+        // Display text with character highlighting
+        function displayText(text) {
+            textDisplay.innerHTML = text.split('').map((char, index) => 
+                `<span class="char-pending" data-index="${index}">${char === ' ' ? '␣' : char}</span>`
+            ).join('');
+        }
+
+        // Start the test
+        async function startTest() {
+            currentText = await fetchText();
+            displayText(currentText);
+            
+            inputArea.disabled = false;
+            inputArea.value = '';
+            inputArea.focus();
+            
+            isRunning = true;
+            testCompleted = false;
+            startTime = null;
+            
+            wpmDisplay.textContent = '0';
+            accuracyDisplay.textContent = '100%';
+            timeDisplay.textContent = '0s';
+            timerDisplay.textContent = '';
+            resultMessage.style.display = 'none';
+            
+            startBtn.textContent = '⏳ Тестирование...';
+            startBtn.disabled = true;
+        }
+
+        // Restart the test
+        function restartTest() {
+            stopTimer();
+            startTest();
+        }
+
+        // Stop timer
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        // Update timer
+        function updateTimer() {
+            if (!startTime) return;
+            
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            timeDisplay.textContent = `${elapsed}s`;
+            timerDisplay.textContent = `⏱️ ${elapsed} seconds`;
+            
+            // Calculate live characters per minute
+            if (elapsed > 0 && inputArea.value.length > 0) {
+                const cpm = Math.round(inputArea.value.length / (elapsed / 60));
+                wpmDisplay.textContent = cpm;
+            }
+        }
+
+        // Calculate results
+        function calculateResults() {
+            const typed = inputArea.value;
+            const timeSeconds = (Date.now() - startTime) / 1000;
+            
+            let correct = 0;
+            for (let i = 0; i < typed.length; i++) {
+                if (typed[i] === currentText[i]) {
+                    correct++;
+                }
+            }
+            
+            const accuracy = typed.length > 0 ? Math.round((correct / typed.length) * 100) : 100;
+            const cpm = Math.round(typed.length / (timeSeconds / 60));
+            
+            wpmDisplay.textContent = isFinite(cpm) ? cpm : 0;
+            accuracyDisplay.textContent = `${accuracy}%`;
+            
+            return { cpm: isFinite(cpm) ? cpm : 0, accuracy, timeSeconds, correct, totalChars: typed.length };
+        }
+
+        // Handle input
+        inputArea.addEventListener('input', () => {
+            if (!isRunning) return;
+            
+            if (!startTime) {
+                startTime = Date.now();
+                timerInterval = setInterval(updateTimer, 1000);
+            }
+            
+            const typed = inputArea.value;
+            const chars = textDisplay.querySelectorAll('span');
+            
+            // Update character colors
+            chars.forEach((char, index) => {
+                if (index < typed.length) {
+                    if (typed[index] === currentText[index]) {
+                        char.className = 'char-correct';
+                    } else {
+                        char.className = 'char-wrong';
+                    }
+                } else {
+                    char.className = 'char-pending';
+                }
+            });
+            
+            // Check if test is complete
+            if (typed.length === currentText.length) {
+                const results = calculateResults();
+                stopTimer();
+                isRunning = false;
+                testCompleted = true;
+                inputArea.disabled = true;
+                startBtn.textContent = '▶️ Начать тест';
+                startBtn.disabled = false;
+                
+                // Show result message
+                resultMessage.innerHTML = `🎉 Готово!<br>Симв/мин: ${results.cpm} | Точность: ${results.accuracy}%`;
+                resultMessage.style.display = 'block';
+                
+                // Send results to server
+                fetch('/api/result', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(results)
+                });
+            }
+        });
+
+        // Event listeners
+        startBtn.addEventListener('click', startTest);
+        restartBtn.addEventListener('click', restartTest);
+        
+        resetBtn.addEventListener('click', async () => {
+            try {
+                await fetch('/api/text/reset', { method: 'POST' });
+                fragmentInfo.textContent = 'Фрагмент 1 из —';
+                alert('✅ Индекс сброшен!');
+            } catch (error) {
+                alert('❌ Ошибка сброса');
+            }
+        });
+        
+        loadTextBtn.addEventListener('click', () => {
+            textModal.style.display = 'flex';
+            textInput.focus();
+        });
+        
+        cancelBtn.addEventListener('click', () => {
+            textModal.style.display = 'none';
+            textInput.value = '';
+        });
+        
+        saveTextBtn.addEventListener('click', async () => {
+            const text = textInput.value.trim();
+            if (text) {
+                try {
+                    await fetch('/api/text', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text })
+                    });
+                    textModal.style.display = 'none';
+                    textInput.value = '';
+                    alert('✅ Текст сохранён!');
+                } catch (error) {
+                    alert('❌ Ошибка сохранения текста');
+                }
+            }
+        });
+        
+        // Close modal on outside click
+        textModal.addEventListener('click', (e) => {
+            if (e.target === textModal) {
+                textModal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
